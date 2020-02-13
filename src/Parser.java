@@ -1,49 +1,60 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+
 public class Parser {
 	
-	public Map<String, Integer> words = new HashMap<String, Integer>();
-	
-	public void getFiles() throws IOException {
+	public Map<String, Integer> dictionnary = new HashMap<String, Integer>();
+
+	public void getFiles() {
 		File folder = new File("./Files");
 		File[] listOfFiles = folder.listFiles();
 		
 		for (File file : listOfFiles) {
 		    if (file.isFile()) {
 		        System.out.println(file.getName());
-		        getWords(file);
+		        try {
+					getWords(file);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		    }
 		}
 	}
-	
-	public void getWords(File f) throws IOException {
-		
-		Scanner sc = null;
-		try {
-	        sc = new Scanner(f);
-	    } catch (FileNotFoundException e) {
-	        e.printStackTrace();  
-	    }
-	    while (sc.hasNextLine()) {
-	            Scanner s2 = new Scanner(sc.nextLine());
-	        while (s2.hasNext()) {
-	            String s = s2.next();
-	            if(words.containsKey(s)) {
-	            	words.put(s, words.get(s)+1);
+
+	public void getWords(File f) throws IOException{
+		if(f.getName().contains("pdf")) {
+			PDDocument document = PDDocument.load(f);
+			PDFTextStripper pdfStripper = new PDFTextStripper();
+			String text = pdfStripper.getText(document);
+			text.replace(".", "");
+			text.replace(",", "");
+			String[] words = text.split(" ");
+
+			for(String word:  words) {
+				if(dictionnary.containsKey(word)) {
+	            	dictionnary.put(word, dictionnary.get(word)+1);
 	            }else {
-	            	words.put(s, 1);
+	            	dictionnary.put(word, 1);
 	            }
+			}
+
+		    document.close();
+		}
+
+	    System.out.println(dictionnary);
 	        }
 	    }
 
-	    this.writeCsv(words);
+	    this.writeCsv(dictionnary);
 
 	}
 
@@ -60,6 +71,6 @@ public class Parser {
 		File results = new File("./results.csv");
 		writeStringToFile(results, content, "UTF-8");
 	}
-
-
+	
+	
 }

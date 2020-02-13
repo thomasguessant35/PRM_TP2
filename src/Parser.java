@@ -1,13 +1,17 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
+
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 public class Parser {
 	
-	public HashMap<String, Integer> words = new HashMap<String, Integer>();
+	public Map<String, Integer> words = new HashMap<String, Integer>();
 	
-	public void getFiles() {
+	public void getFiles() throws IOException {
 		File folder = new File("./Files");
 		File[] listOfFiles = folder.listFiles();
 		
@@ -19,7 +23,7 @@ public class Parser {
 		}
 	}
 	
-	public void getWords(File f) {
+	public void getWords(File f) throws IOException {
 		
 		Scanner sc = null;
 		try {
@@ -38,9 +42,24 @@ public class Parser {
 	            }
 	        }
 	    }
-	    
-	    //System.out.println(words);
+
+	    this.writeCsv(words);
+
 	}
-	
-	
+
+	private void writeCsv(Map<String, Integer> words) throws IOException {
+		StringBuilder builder = new StringBuilder();
+		for (Map.Entry<String, Integer> kvp : words.entrySet()) {
+			builder.append(kvp.getKey());
+			builder.append(",");
+			builder.append(kvp.getValue());
+			builder.append("\r\n");
+		}
+
+		String content = builder.toString().trim();
+		File results = new File("./results.csv");
+		writeStringToFile(results, content, "UTF-8");
+	}
+
+
 }

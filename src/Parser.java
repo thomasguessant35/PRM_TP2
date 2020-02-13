@@ -36,9 +36,13 @@ public class Parser {
 			PDDocument document = PDDocument.load(f);
 			PDFTextStripper pdfStripper = new PDFTextStripper();
 			String text = pdfStripper.getText(document);
-			text.replace(".", "");
-			text.replace(",", "");
-			String[] words = text.split(" ");
+			String splitChar = "([^a-zA-Z']+)'*\\1*";
+			text = text.replaceAll("\\.", "");
+			text = text.replaceAll("/", splitChar);
+			text = text.replaceAll("\\)", splitChar);
+			text = text.replaceAll("\\(", splitChar);
+			text = text.replaceAll(",", "");
+			String[] words = text.split(splitChar);
 
 			for(String word:  words) {
 				if(dictionnary.containsKey(word)) {
